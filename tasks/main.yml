@@ -1,0 +1,109 @@
+---
+# tasks file for vmware_rest_provision_lab
+## We start with information gathering and setting some facts.
+- name: Get cluster information
+  vmware.vmware_rest.vcenter_cluster_info:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    names: "{{ vmware_rest_provision_lab_cluster }}"
+  register: __my_cluster
+
+- name: Get detailed cluster information
+  vmware.vmware_rest.vcenter_cluster_info:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    cluster: "{{ __my_cluster.value[0].cluster }}"
+  register: __resource_pool_info
+
+- name: Get detailed datastore information
+  vmware.vmware_rest.vcenter_datastore_info:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    filter_names:
+      - "{{ vmware_rest_provision_lab_datastore }}"
+  register: __my_datastores
+
+- name: Set fact for the datastore
+  ansible.builtin.set_fact:
+    __my_datastore: '{{ __my_datastores.value|first }}'
+
+- name: >-
+    Build a list of all folders with the type VIRTUAL_MACHINE
+    and called vm
+  vmware.vmware_rest.vcenter_folder_info:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    filter_type: VIRTUAL_MACHINE
+    filter_names:
+      - vm
+  register: __my_folders
+
+- name: Set fact my_vm_folder
+  ansible.builtin.set_fact:
+    __my_vm_folder: '{{ __my_folders.value|first }}'
+
+- name: Filter for the desired network to place VM in
+  vmware.vmware_rest.vcenter_network_info:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    filter_types: STANDARD_PORTGROUP
+    filter_names:
+      - "{{ vmware_rest_provision_lab_network }}"
+  register: __network_info
+
+- name: Set fact my_network
+  ansible.builtin.set_fact:
+    __my_network: '{{ __network_info.value|first }}'
+
+## From here we start creating VMs
+- name: Creating VM(s)
+  vmware.vmware_rest.vcenter_vm:
+    vcenter_hostname: "{{ vmware_rest_provision_lab_vc }}"
+    vcenter_username: "{{ vmware_rest_provision_lab_user }}"
+    vcenter_password: "{{ vmware_rest_provision_lab_pass }}"
+    vcenter_validate_certs: "{{ vmware_rest_provision_lab_validate_certs }}"
+    placement:
+      cluster: "{{ __resource_pool_info.id }}"
+      datastore: "{{ __my_datastore.datastore }}"
+      folder: "{{ __my_vm_folder.folder }}"
+      resource_pool: "{{ __resource_pool_info.value.resource_pool }}"
+    name: "{{ item.key }}"
+    guest_OS: "{{ item.value.guest_OS }}"
+    hardware_version: "{{ item.value.hardware_version }}"
+    boot:
+      type: BIOS
+    cdroms:
+      - allow_guest_control: true
+        backing:
+          type: "ISO_FILE"
+          iso_file: "{{ vmware_rest_provision_lab_iso_path }}"
+        label: "CD/DVD drive 1"
+        start_connected: true
+    memory:
+      hot_add_enabled: "{{ item.value.hot_add_enabled }}"
+      size_MiB: "{{ item.value.size_MiB }}"
+    disks:
+      - type: SCSI
+        new_vmdk:
+          name: "{{ item.key }}"
+          capacity: "{{ item.value.disk_size }}"
+          storage_policy_spec: "{{ item.value.storage_policy_spec }}"
+    nics:
+      - start_connected: true
+        type: VMXNET3
+        mac_type: GENERATED
+        backing:
+          type: STANDARD_PORTGROUP
+          network: "{{ __my_network.network }}"
+  with_dict: "{{ vmware_rest_provision_lab_guests }}"
+  register: __result

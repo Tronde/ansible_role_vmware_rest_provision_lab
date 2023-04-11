@@ -97,7 +97,8 @@
         new_vmdk:
           name: "{{ item.key }}"
           capacity: "{{ item.value.disk_size }}"
-          storage_policy_spec: "{{ item.value.storage_policy_spec }}"
+          storage_policy:
+            policy: "{{ item.value.storage_policy_spec }}"
     nics:
       - start_connected: true
         type: VMXNET3

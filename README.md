@@ -84,14 +84,16 @@ vmware_rest_provision_lab_guests:
     hot_add_enabled: true
     size_MiB: 2048
     disk_size: 100000000 # Size in Bytes
-    storage_policy_spec: thin 
+    storage_policy:
+      policy: UUID # The UUID of the storage policy to use
   VM_NAME_2:
     guest_OS: RHEL_8_64 # See vmware.vmware_rest.vcenter_vm for possible values.
     hardware_version: VMX_19 # See https://kb.vmware.com/s/article/1003746
     hot_add_enabled: true
     size_MiB: 2048
     disk_size: 100000000 # Size in Bytes
-    storage_policy_spec: thin
+    storage_policy:
+      policy: UUID # The UUID of the storage policy to use
 ~~~
 
 Example Playbook
@@ -122,14 +124,16 @@ A playbook containing necessary vars could look like:
         hot_add_enabled: true
         size_MiB: 2048
         disk_size: 100000 # Size in Bytes
-        storage_policy_spec: thin
+        storage_policy:
+          policy: UUID # The UUID of the storage policy to use
       test_vm2:
         guest_OS: RHEL_8_64
         hardware_version: VMX_19 # See https://kb.vmware.com/s/article/1003746
         hot_add_enabled: true
         size_MiB: 2048
         disk_size: 100000 # Size in Bytes
-        storage_policy_spec: thin
+        storage_policy:
+          policy: UUID # The UUID of the storage policy to use
   roles:
     - vmware_rest_provision_lab
 ~~~

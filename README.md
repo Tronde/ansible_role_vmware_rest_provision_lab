@@ -84,6 +84,7 @@ vmware_rest_provision_lab_guests:
     hot_add_enabled: true
     size_MiB: 2048
     disk_size: 100000000 # Size in Bytes
+    cpu_count: 1
     storage_policy:
       policy: UUID # The UUID of the storage policy to use
   VM_NAME_2:
@@ -92,6 +93,7 @@ vmware_rest_provision_lab_guests:
     hot_add_enabled: true
     size_MiB: 2048
     disk_size: 100000000 # Size in Bytes
+    cpu_count: 1
     storage_policy:
       policy: UUID # The UUID of the storage policy to use
 ~~~
@@ -124,6 +126,7 @@ A playbook containing necessary vars could look like:
         hot_add_enabled: true
         size_MiB: 2048
         disk_size: 100000 # Size in Bytes
+        cpu_count: 1
         storage_policy:
           policy: UUID # The UUID of the storage policy to use
       test_vm2:
@@ -132,6 +135,7 @@ A playbook containing necessary vars could look like:
         hot_add_enabled: true
         size_MiB: 2048
         disk_size: 100000 # Size in Bytes
+        cpu_count: 1
         storage_policy:
           policy: UUID # The UUID of the storage policy to use
   roles:

@@ -89,6 +89,8 @@
           iso_file: "{{ vmware_rest_provision_lab_iso_path }}"
         label: "CD/DVD drive 1"
         start_connected: true
+    cpu:
+      count: "{{ item.value.cpu_count }}"
     memory:
       hot_add_enabled: "{{ item.value.hot_add_enabled }}"
       size_MiB: "{{ item.value.size_MiB }}"

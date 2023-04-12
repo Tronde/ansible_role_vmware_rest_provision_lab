@@ -25,6 +25,7 @@ vmware_rest_provision_lab_guests:
     size_MiB: 2048
     disk_size: 100000 # Size in Bytes
     storage_policy_spec: "aa6d5a82-1c88-45da-85d3-3d74b91a5bad" # UUID of the default storage policy for VSAN datastores
+    cpu_count: 1
   VM_NAME_2:
     guest_OS: RHEL_8_64 # See vmware.vmware_rest.vcenter_vm for possible values.
     hardware_version: VMX_19 # See https://kb.vmware.com/s/article/1003746
@@ -32,3 +33,4 @@ vmware_rest_provision_lab_guests:
     size_MiB: 2048
     disk_size: 100000 # Size in Bytes
     storage_policy_spec: "aa6d5a82-1c88-45da-85d3-3d74b91a5bad" # UUID of the default storage policy for VSAN datastores
+    cpu_count: 1
